@@ -988,7 +988,7 @@ static void ui_logf(const char *fmt, ...) {
     g_free(s);
 }
 
-static void panel_poner(const char *s, const char *fondo) {
+static void panel_texto(const char *s, const char *fondo) {
     if (!panel_lbl) return;
     gtk_label_set_text(GTK_LABEL(panel_lbl), s);
     gchar *css = g_strdup_printf("* { background-color: %s; color: #ffffff; font-weight: bold; }", fondo);
@@ -1000,10 +1000,26 @@ static void panel_mostrar(bool si) {
     if (si) gtk_widget_show_all(panel_win); else gtk_widget_hide(panel_win);
 }
 
+// El panel solo se ve con el menú del tabulador abierto o mientras graba, reproduce o pelea.
+static double ocultar_en = 1e300;
+
+static void mostrar(const char *s, const char *fondo, bool temporal) {
+    panel_texto(s, fondo);
+    ocultar_en = temporal ? ahora() + 2.5 : 1e300;
+    if (cfg.panel && panel_win && !gtk_widget_get_visible(panel_win)) panel_mostrar(true);
+}
+
+static void ocultar(void) {
+    ocultar_en = 1e300;
+    if (panel_win) panel_mostrar(false);
+}
+
+// Sin nada que hacer el panel se esconde para jugar sin él; si hay algo que avisar, lo enseña 2,5 s.
 static void listo(const char *ultimo) {
     if (motor_ocupado() || grab.activo) return;
-    gchar *s = g_strdup_printf("%s%sListo · sec. %d (%d acciones)", ultimo ? ultimo : "", ultimo ? " · " : "", cfg.slot, secs[cfg.slot].n);
-    panel_poner(s, ultimo && g_str_has_prefix(ultimo, "Parado") ? AZUL : GRIS);
+    if (!ultimo) { ocultar(); return; }
+    gchar *s = g_strdup_printf("%s · Listo · sec. %d (%d acciones)", ultimo, cfg.slot, secs[cfg.slot].n);
+    mostrar(s, g_str_has_prefix(ultimo, "Parado") ? AZUL : GRIS, true);
     g_free(s);
 }
 
@@ -1101,7 +1117,7 @@ static void empezar_grabacion(void) {
     sonido_grabar();
     ui_logf("Grabando en la secuencia %d… (tabulador para terminar)", grab.slot);
     gchar *s = g_strdup_printf("GRABANDO sec. %d · 0 acciones · TAB termina", grab.slot);
-    panel_poner(s, ROJO);
+    mostrar(s, ROJO, false);
     g_free(s);
 }
 
@@ -1120,7 +1136,9 @@ static void terminar_grabacion(void) {
     guardar_secuencias();
     ui_logf("Grabación terminada: %d acciones en la secuencia %d", secs[grab.slot].n, grab.slot);
     if (cfg.slot == grab.slot) mostrar_texto();
-    listo(NULL);
+    gchar *fin = g_strdup_printf("Grabación terminada: %d acciones", secs[grab.slot].n);
+    listo(fin);
+    g_free(fin);
 }
 
 static void anotar(Accion a) {
@@ -1138,7 +1156,7 @@ static void anotar(Accion a) {
     lista_anadir(&grab.acciones, a);
     sonido_anotar();
     gchar *s = g_strdup_printf("GRABANDO sec. %d · %d acciones · TAB termina", grab.slot, grab.acciones.n);
-    panel_poner(s, ROJO);
+    mostrar(s, ROJO, false);
     g_free(s);
     char d[160]; accion_describir(&a, d, sizeof d);
     ui_logf("  + %s", d);
@@ -1194,7 +1212,7 @@ static void abrir_menu(Modo m) {
         break;
     case M_CERRADO: break;
     }
-    if (s) panel_poner(s, AZUL);
+    if (s) mostrar(s, AZUL, false);
     g_free(s); g_free(datos);
     g_string_free(con, TRUE);
 }
@@ -1308,7 +1326,7 @@ static gpointer vigia_hilo(gpointer p) {
 // ---- llamadas desde otros hilos
 
 static gboolean ui_estado(gpointer p) {
-    if (motor_ocupado()) panel_poner(p, VERDE);
+    if (motor_ocupado()) mostrar(p, VERDE, false);
     g_free(p);
     return G_SOURCE_REMOVE;
 }
@@ -1329,6 +1347,7 @@ static gboolean ui_anotada(gpointer p) {
 static gboolean ui_reloj(gpointer p) {
     (void)p;
     if (menu != M_CERRADO && ahora() > menu_hasta) cerrar_menu();
+    if (ahora() > ocultar_en && menu == M_CERRADO && !motor_ocupado() && !grab.activo) ocultar();
     return G_SOURCE_CONTINUE;
 }
 
@@ -1348,7 +1367,7 @@ static void en_cambio_ajustes(GtkWidget *w, gpointer p) {
     if (*pr) g_strlcpy(cfg.proceso, pr, sizeof cfg.proceso);
     g_free(pr);
     bool panel = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_panel));
-    if (panel != cfg.panel) { cfg.panel = panel; panel_mostrar(panel); }
+    if (panel != cfg.panel) { cfg.panel = panel; if (!panel) ocultar(); }
     cfg_guardar();
 }
 
@@ -1668,8 +1687,7 @@ int main(int argc, char **argv) {
     refrescar_slots();
     mostrar_texto();
 
-    gtk_widget_show_all(ventana);
-    panel_mostrar(cfg.panel);
+    gtk_widget_show_all(ventana); // el panel queda oculto hasta pulsar TAB
     cargando = false;
 
     ui_log("AutoPrisión 2026 para Linux por Carlos Sanz · basado en AutoPrisión DX de Jagoba Los Arcos González (MoleSoft, moledj.com)");
@@ -1688,7 +1706,7 @@ int main(int argc, char **argv) {
     if (xtest) ui_log("Listo. TAB abre el menú y TAB lo para todo (F11 y Pausa también paran).");
     listo(NULL);
 
-    g_timeout_add_seconds(1, ui_reloj, NULL);
+    g_timeout_add(500, ui_reloj, NULL);
     g_thread_unref(g_thread_new("vigia", vigia_hilo, NULL));
     gtk_main();
     return 0;

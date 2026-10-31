@@ -723,7 +723,8 @@ namespace AutoPrision2026
         readonly Motor motor;
         readonly Grabador grabador;
         readonly PanelEstado panel = new PanelEstado();
-        readonly System.Windows.Forms.Timer reloj = new System.Windows.Forms.Timer { Interval = 2000 };
+        readonly System.Windows.Forms.Timer reloj = new System.Windows.Forms.Timer { Interval = 500 };
+        DateTime ocultarEn = DateTime.MaxValue;
         int slotGrabando;
 
         ListBox lstSlots, lstLog;
@@ -760,12 +761,12 @@ namespace AutoPrision2026
             RefrescarSlots();
             lstSlots.SelectedIndex = cfg.Slot - 1;
 
-            motor.Estado += delegate (string s) { EnUI(delegate { panel.Poner(s, Verde); }); };
+            motor.Estado += delegate (string s) { EnUI(delegate { if (motor.Ocupado) Mostrar(s, Verde, false); }); };
             motor.Terminado += delegate (string s) { EnUI(delegate { Log(s); Listo(s); }); };
             grabador.Anotada += delegate (Accion a)
             {
                 Sonido.Anotar();
-                panel.Poner("GRABANDO sec. " + slotGrabando + " · " + grabador.Acciones.Count + " acciones · TAB termina", Rojo);
+                Mostrar("GRABANDO sec. " + slotGrabando + " · " + grabador.Acciones.Count + " acciones · TAB termina", Rojo, false);
                 Log("  + " + a.Describir());
             };
 
@@ -773,6 +774,7 @@ namespace AutoPrision2026
             {
                 if (panel.Visible) panel.SubirArriba();
                 if (menu != Modo.Cerrado && DateTime.Now > menuHasta) CerrarMenu();
+                if (DateTime.Now > ocultarEn && menu == Modo.Cerrado && !motor.Ocupado && !grabador.Activo) Ocultar();
             };
             reloj.Start();
             ArrancarVigia();
@@ -863,12 +865,12 @@ namespace AutoPrision2026
             for (int i = 1; i <= 9; i++) if (secs.S[i].Count > 0) con += (con.Length > 0 ? "," : "") + i;
             switch (m)
             {
-                case Modo.Principal: panel.Poner("1 Autoclick · 2 Grabar · 3 Reproducir · 4 Velocidad · 5 Una vez · 6 Autopelea · 7/8 Señal turno · 0 Quitar", Azul); break;
-                case Modo.Grabar: panel.Poner("GRABAR en la secuencia nº… (1-9)   con datos: " + (con.Length > 0 ? con : "ninguna"), Azul); break;
-                case Modo.Reproducir: panel.Poner("REPRODUCIR UNA VEZ la secuencia nº… (1-9)   con datos: " + (con.Length > 0 ? con : "ninguna"), Azul); break;
-                case Modo.Bucle: panel.Poner("REPRODUCIR (hasta TAB) la secuencia nº… (1-9)   con datos: " + (con.Length > 0 ? con : "ninguna"), Azul); break;
+                case Modo.Principal: Mostrar("1 Autoclick · 2 Grabar · 3 Reproducir · 4 Velocidad · 5 Una vez · 6 Autopelea · 7/8 Señal turno · 0 Quitar", Azul, false); break;
+                case Modo.Grabar: Mostrar("GRABAR en la secuencia nº… (1-9)   con datos: " + (con.Length > 0 ? con : "ninguna"), Azul, false); break;
+                case Modo.Reproducir: Mostrar("REPRODUCIR UNA VEZ la secuencia nº… (1-9)   con datos: " + (con.Length > 0 ? con : "ninguna"), Azul, false); break;
+                case Modo.Bucle: Mostrar("REPRODUCIR (hasta TAB) la secuencia nº… (1-9)   con datos: " + (con.Length > 0 ? con : "ninguna"), Azul, false); break;
                 case Modo.Velocidad:
-                    panel.Poner("Una acción cada " + cfg.Velocidad + " ms (1 más rápido · 2 más lento) · autoclick " + cfg.AutoClickMs + " ms (3 · 4)", Azul);
+                    Mostrar("Una acción cada " + cfg.Velocidad + " ms (1 más rápido · 2 más lento) · autoclick " + cfg.AutoClickMs + " ms (3 · 4)", Azul, false);
                     break;
             }
         }
@@ -1016,7 +1018,7 @@ namespace AutoPrision2026
                     {
                         lstSlots.SelectedIndex = cfg.Slot % 9;
                         Sonido.Anotar();
-                        panel.Poner("Secuencia activa: " + cfg.Slot + " (" + secs.S[cfg.Slot].Count + " acciones)", Azul);
+                        Mostrar("Secuencia activa: " + cfg.Slot + " (" + secs.S[cfg.Slot].Count + " acciones)", Azul, true);
                     }
                     break;
             }
@@ -1074,7 +1076,7 @@ namespace AutoPrision2026
             if (!grabador.Empezar()) { Log("ERROR: Windows no dejó instalar la captura de ratón y teclado"); return; }
             Sonido.Grabar();
             Log("Grabando en la secuencia " + slotGrabando + "… (tabulador para terminar)");
-            panel.Poner("GRABANDO sec. " + slotGrabando + " · 0 acciones · TAB termina", Rojo);
+            Mostrar("GRABANDO sec. " + slotGrabando + " · 0 acciones · TAB termina", Rojo, false);
         }
 
         void TerminarGrabacion()
@@ -1086,7 +1088,7 @@ namespace AutoPrision2026
             GuardarSecuencias();
             Log("Grabación terminada: " + r.Count + " acciones en la secuencia " + slotGrabando);
             if (cfg.Slot == slotGrabando) MostrarTexto();
-            Listo(null);
+            Listo("Grabación terminada: " + r.Count + " acciones");
         }
 
         void PararTodo(string motivo)
@@ -1095,10 +1097,26 @@ namespace AutoPrision2026
             if (motor.Ocupado) motor.Parar(motivo);
         }
 
+        // Sin nada que hacer el panel se esconde para jugar sin él; si hay algo que avisar, lo enseña 2,5 s.
         void Listo(string ultimo)
         {
             if (motor.Ocupado || grabador.Activo) return;
-            panel.Poner((ultimo != null ? ultimo + " · " : "") + "Listo · sec. " + cfg.Slot + " (" + secs.S[cfg.Slot].Count + " acciones)", ultimo != null && ultimo.StartsWith("Parado") ? Azul : Gris);
+            if (ultimo == null) { Ocultar(); return; }
+            Mostrar(ultimo + " · Listo · sec. " + cfg.Slot + " (" + secs.S[cfg.Slot].Count + " acciones)", ultimo.StartsWith("Parado") ? Azul : Gris, true);
+        }
+
+        // El panel solo se ve con el menú del tabulador abierto o mientras graba, reproduce o pelea.
+        void Mostrar(string texto, Color fondo, bool temporal)
+        {
+            panel.Poner(texto, fondo);
+            ocultarEn = temporal ? DateTime.Now.AddSeconds(2.5) : DateTime.MaxValue;
+            if (cfg.Panel && !panel.Visible) { panel.Show(); panel.SubirArriba(); }
+        }
+
+        void Ocultar()
+        {
+            ocultarEn = DateTime.MaxValue;
+            if (panel.Visible) panel.Hide();
         }
 
         // ---- secuencias en pantalla
@@ -1169,7 +1187,7 @@ namespace AutoPrision2026
                 "Créditos", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        void MostrarPanel() { if (cfg.Panel) panel.Show(); else panel.Hide(); }
+        void MostrarPanel() { if (!cfg.Panel) Ocultar(); }
 
         void Log(string s)
         {

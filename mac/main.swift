@@ -748,12 +748,14 @@ final class Principal: NSObject {
         popSlots.selectItem(at: cfg.slot - 1)
         mostrarTexto()
 
-        motor.estado = { [weak self] s in DispatchQueue.main.async { self?.panel.poner(s, Principal.verde) } }
+        motor.estado = { [weak self] s in
+            DispatchQueue.main.async { if let self = self, self.motor.ocupado { self.mostrar(s, Principal.verde, temporal: false) } }
+        }
         motor.terminado = { [weak self] s in DispatchQueue.main.async { self?.log(s); self?.listo(s) } }
         grabador.anotada = { [weak self] a in
             guard let self = self else { return }
             Sonido.anotar()
-            self.panel.poner("GRABANDO sec. \(self.slotGrabando) · \(self.grabador.acciones?.count ?? 0) acciones · TAB termina", Principal.rojo)
+            self.mostrar("GRABANDO sec. \(self.slotGrabando) · \(self.grabador.acciones?.count ?? 0) acciones · TAB termina", Principal.rojo, temporal: false)
             self.log("  + " + a.describir())
         }
 
@@ -761,9 +763,10 @@ final class Principal: NSObject {
             self?.pararTodo("Cerrando")
             NSApp.terminate(nil)
         }
-        Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+        Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
             guard let self = self else { return }
             if self.menu != .cerrado && Date() > self.menuHasta { self.cerrarMenu() }
+            if Date() > self.ocultarEn && self.menu == .cerrado && !self.motor.ocupado && !self.grabador.activo { self.ocultar() }
         }
 
         Juego.vigilar()
@@ -910,12 +913,12 @@ final class Principal: NSObject {
         let con = (1...9).filter { !secs.s[$0].isEmpty }.map(String.init).joined(separator: ",")
         let datos = "   con datos: " + (con.isEmpty ? "ninguna" : con)
         switch m {
-        case .principal: panel.poner("1 Autoclick · 2 Grabar · 3 Reproducir · 4 Velocidad · 5 Una vez · 6 Autopelea · 7/8 Señal turno · 0 Quitar", Principal.azul)
-        case .grabar: panel.poner("GRABAR en la secuencia nº… (1-9)" + datos, Principal.azul)
-        case .reproducir: panel.poner("REPRODUCIR UNA VEZ la secuencia nº… (1-9)" + datos, Principal.azul)
-        case .bucle: panel.poner("REPRODUCIR (hasta TAB) la secuencia nº… (1-9)" + datos, Principal.azul)
+        case .principal: mostrar("1 Autoclick · 2 Grabar · 3 Reproducir · 4 Velocidad · 5 Una vez · 6 Autopelea · 7/8 Señal turno · 0 Quitar", Principal.azul, temporal: false)
+        case .grabar: mostrar("GRABAR en la secuencia nº… (1-9)" + datos, Principal.azul, temporal: false)
+        case .reproducir: mostrar("REPRODUCIR UNA VEZ la secuencia nº… (1-9)" + datos, Principal.azul, temporal: false)
+        case .bucle: mostrar("REPRODUCIR (hasta TAB) la secuencia nº… (1-9)" + datos, Principal.azul, temporal: false)
         case .velocidad:
-            panel.poner("Una acción cada \(cfg.velocidad) ms (1 más rápido · 2 más lento) · autoclick \(cfg.autoClickMs) ms (3 · 4)", Principal.azul)
+            mostrar("Una acción cada \(cfg.velocidad) ms (1 más rápido · 2 más lento) · autoclick \(cfg.autoClickMs) ms (3 · 4)", Principal.azul, temporal: false)
         case .cerrado: break
         }
     }
@@ -1135,7 +1138,7 @@ final class Principal: NSObject {
         if !grabador.empezar() { log("ERROR: macOS no dejó escuchar el ratón y el teclado (falta el permiso de Monitorización de entrada)"); return }
         Sonido.grabar()
         log("Grabando en la secuencia \(slotGrabando)… (tabulador para terminar)")
-        panel.poner("GRABANDO sec. \(slotGrabando) · 0 acciones · TAB termina", Principal.rojo)
+        mostrar("GRABANDO sec. \(slotGrabando) · 0 acciones · TAB termina", Principal.rojo, temporal: false)
     }
 
     func terminarGrabacion() {
@@ -1148,7 +1151,7 @@ final class Principal: NSObject {
         guardarSecuencias()
         log("Grabación terminada: \(acciones.count) acciones en la secuencia \(slotGrabando)")
         if cfg.slot == slotGrabando { mostrarTexto() }
-        listo(nil)
+        listo("Grabación terminada: \(acciones.count) acciones")
     }
 
     func pararTodo(_ motivo: String) {
@@ -1156,10 +1159,26 @@ final class Principal: NSObject {
         if motor.ocupado { motor.pararCon(motivo) }
     }
 
+    // Sin nada que hacer el panel se esconde para jugar sin él; si hay algo que avisar, lo enseña 2,5 s.
     func listo(_ ultimo: String?) {
         if motor.ocupado || grabador.activo { return }
-        panel.poner((ultimo.map { $0 + " · " } ?? "") + "Listo · sec. \(cfg.slot) (\(secs.s[cfg.slot].count) acciones)",
-                    ultimo?.hasPrefix("Parado") == true ? Principal.azul : Principal.gris)
+        guard let u = ultimo else { ocultar(); return }
+        mostrar(u + " · Listo · sec. \(cfg.slot) (\(secs.s[cfg.slot].count) acciones)",
+                u.hasPrefix("Parado") ? Principal.azul : Principal.gris, temporal: true)
+    }
+
+    // El panel solo se ve con el menú del tabulador abierto o mientras graba, reproduce o pelea.
+    var ocultarEn = Date.distantFuture
+
+    func mostrar(_ texto: String, _ fondo: NSColor, temporal: Bool) {
+        panel.poner(texto, fondo)
+        ocultarEn = temporal ? Date().addingTimeInterval(2.5) : .distantFuture
+        if cfg.panel { panel.mostrar(true) }
+    }
+
+    func ocultar() {
+        ocultarEn = .distantFuture
+        panel.mostrar(false)
     }
 
     // ---- secuencias en pantalla
@@ -1222,7 +1241,7 @@ final class Principal: NSObject {
         al.runModal()
     }
 
-    func mostrarPanel() { panel.mostrar(cfg.panel) }
+    func mostrarPanel() { if !cfg.panel { ocultar() } }
 
     func log(_ s: String) {
         let d = Date()

@@ -4,4 +4,4 @@ build/
 *.zip
 autoprision.log
 linux/autoprision2026
-linux/captura.png
+linux/captura*.png
