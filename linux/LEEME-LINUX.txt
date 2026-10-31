@@ -1,0 +1,38 @@
+AutoPrisión 2026 para Linux
+===========================
+
+1. INSTALAR
+   - Descomprime: tar xzf AutoPrision2026-Linux.tar.gz
+   - Abre la carpeta AutoPrision2026-Linux y ejecuta ./autoprision2026
+     (o ./instalar.sh para tenerlo en el menú de aplicaciones).
+   - Necesita GTK 3 y libXtst, que casi todos los escritorios ya traen. Si no arranca:
+       Ubuntu/Debian/Mint: sudo apt install libgtk-3-0 libxtst6
+       Fedora:             sudo dnf install gtk3 libXtst
+       Arch/SteamOS:       sudo pacman -S gtk3 libxtst
+
+2. X11 Y WAYLAND
+   AutoPrisión trabaja por X11, igual que Prison Legacy (usa SDL2).
+   - Sesión X11 / Xorg: funciona todo.
+   - Sesión Wayland (GNOME, KDE…): funciona con el juego porque va por XWayland, pero algunos
+     escritorios no dejan mover el ratón desde fuera. Si el TAB no responde o el ratón no se mueve,
+     cierra sesión y elige «Ubuntu en Xorg», «Plasma (X11)» o similar en la pantalla de inicio.
+   - Steam Deck: úsalo en el Modo escritorio.
+
+3. USO (igual que en Windows y Mac)
+   TAB+1 autoclick · TAB+2+nº grabar (TAB termina) · TAB+3+nº reproducir hasta TAB
+   TAB+4 velocidad · TAB+5+nº una vez · TAB+6 autopelea (Control+R cada turno)
+   TAB+7 guardar señal de turno bajo el ratón · TAB+8 borrarla · 0 quita el menú
+   PARAR: TAB. De reserva: F11 o Pausa.
+
+   «Solo con el juego delante»: solo actúa si el programa de delante se llama como pone
+   en «Nombre» (por defecto «Prison»). Si para nada más empezar diciendo «el juego no
+   está delante», el registro dice cómo se llama el programa: escríbelo en «Nombre»
+   o quita esa casilla.
+
+   Los datos (secuencias.txt, autoprision.ini, autoprision.log) están en la carpeta
+   «AutoPrision 2026» de tu carpeta personal (botón «Abrir carpeta»).
+   Las secuencias grabadas en Windows o Mac no sirven tal cual: los códigos de tecla
+   son distintos (en Linux R=27). Los clics sí, si la pantalla tiene la misma resolución.
+
+Úsalo bajo tu responsabilidad: las normas del juego pueden no permitir automatizar acciones.
+Basado en AutoPrisión DX de Jagoba Los Arcos González (MoleSoft). Versión 2026: Carlos Sanz.
