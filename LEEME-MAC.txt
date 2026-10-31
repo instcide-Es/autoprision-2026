@@ -1,0 +1,36 @@
+AutoPrisión 2026 para Mac
+=========================
+
+1. INSTALAR
+   - Descomprime el ZIP y arrastra «AutoPrision 2026.app» a la carpeta Aplicaciones.
+   - La primera vez el Mac dirá que no puede comprobar la app (no está firmada por Apple).
+     Ve a Ajustes del Sistema > Privacidad y seguridad, baja del todo y pulsa «Abrir igualmente».
+     (Otra forma, en Terminal: xattr -cr "/Applications/AutoPrision 2026.app")
+
+2. PERMISOS (Ajustes del Sistema > Privacidad y seguridad)
+   - Accesibilidad: activa AutoPrisión 2026 (para mover el ratón y pulsar teclas).
+   - Monitorización de entrada: activa AutoPrisión 2026 (para leer TAB y los números).
+   - Grabación de pantalla: solo si usas la señal de turno (TAB+7) o la acción P.
+   Después de darlos, cierra AutoPrisión (Cmd+Q) y ábrelo otra vez.
+   El botón «Permisos…» de la ventana lleva directo al sitio que falta.
+
+3. USO (igual que en Windows)
+   TAB+1 autoclick · TAB+2+nº grabar (TAB termina) · TAB+3+nº reproducir hasta TAB
+   TAB+4 velocidad · TAB+5+nº una vez · TAB+6 autopelea (Control+R cada turno)
+   TAB+7 guardar señal de turno bajo el ratón · TAB+8 borrarla · 0 quita el menú
+   PARAR: TAB. De reserva: F11 (con fn) o Comando+punto.
+
+   «Solo con el juego delante»: solo actúa si el programa de delante se llama como pone
+   en «Nombre» (por defecto «Prison»). Si para nada más empezar diciendo «el juego no
+   está delante», el registro dice cómo se llama el programa: escríbelo en «Nombre»
+   o quita esa casilla.
+
+   Los datos (secuencias.txt, autoprision.ini, autoprision.log) están en la carpeta
+   «AutoPrision 2026» de tu carpeta de usuario (botón «Abrir carpeta»).
+   Las secuencias grabadas en Windows no sirven tal cual: hay que grabarlas en el Mac.
+
+   Si la autopelea del juego en Mac fuese con Comando+R en vez de Control+R, cambia en
+   autoprision.ini la línea autopelea_tecla=C+15 por autopelea_tecla=M+15.
+
+Úsalo bajo tu responsabilidad: las normas del juego pueden no permitir automatizar acciones.
+Basado en AutoPrisión DX de Jagoba Los Arcos González (MoleSoft). Versión 2026: Carlos Sanz.
