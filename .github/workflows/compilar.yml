@@ -1,7 +1,8 @@
 name: Compilar Windows y Mac
 on:
   push:
-    branches: [main, 'worktree-*']
+    branches: [main]
+  pull_request:
     tags: ['v*']
   workflow_dispatch:
 permissions:

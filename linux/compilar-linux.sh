@@ -5,6 +5,6 @@
 #   Arch:          sudo pacman -S base-devel gtk3 libxtst
 set -e
 cd "$(dirname "$0")"
-gcc -O2 -Wall -Wextra -Wno-unused-parameter -o autoprision2026 autoprision.c \
+gcc -O2 -Wall -Wextra -Wno-unused-parameter -Wno-format-truncation -o autoprision2026 autoprision.c \
   $(pkg-config --cflags --libs gtk+-3.0 x11 xtst) -lpthread
 echo "Hecho: autoprision2026"
