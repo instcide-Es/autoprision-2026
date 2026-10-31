@@ -1,0 +1,22 @@
+AutoPrisión 2026 para Windows
+=============================
+
+1. INSTALAR
+   - Descomprime el ZIP en una carpeta propia (por ejemplo en el Escritorio).
+   - Abre AutoPrision2026.exe. No hace falta instalar nada (usa .NET Framework 4, que
+     ya viene con Windows 10 y 11).
+   - La primera vez Windows puede mostrar «Windows protegió su PC» porque el programa
+     no está firmado: pulsa «Más información» y luego «Ejecutar de todas formas».
+
+2. USO
+   TAB+1 autoclick · TAB+2+nº grabar (TAB termina) · TAB+3+nº reproducir hasta TAB
+   TAB+4 velocidad · TAB+5+nº una vez · TAB+6 autopelea (Control+R cada turno)
+   TAB+7 guardar señal de turno bajo el ratón · TAB+8 borrarla · 0 quita el menú
+   PARAR: TAB. De reserva: F11 o Pausa.
+
+   Los datos (secuencias.txt, autoprision.ini, autoprision.log) se guardan en la misma
+   carpeta que AutoPrision2026.exe. Para conservar tus secuencias al actualizar,
+   copia esos archivos a la carpeta nueva.
+
+Úsalo bajo tu responsabilidad: las normas del juego pueden no permitir automatizar acciones.
+Basado en AutoPrisión DX de Jagoba Los Arcos González (MoleSoft). Versión 2026: Carlos Sanz.

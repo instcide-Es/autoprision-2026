@@ -1,2 +1,5 @@
 build/
 *.app/
+*.exe
+*.zip
+autoprision.log

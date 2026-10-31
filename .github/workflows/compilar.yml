@@ -1,0 +1,58 @@
+name: Compilar Windows y Mac
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compilar
+        shell: cmd
+        run: |
+          cd windows
+          "%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /codepage:65001 /optimize+ /target:winexe /platform:anycpu /out:AutoPrision2026.exe /r:System.Windows.Forms.dll /r:System.Drawing.dll AutoPrision.cs
+      - name: Empaquetar
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory paquete | Out-Null
+          Copy-Item windows/AutoPrision2026.exe, windows/LEEME-WINDOWS.txt paquete/
+          Compress-Archive -Path paquete/* -DestinationPath AutoPrision2026-Windows.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AutoPrision2026-Windows
+          path: AutoPrision2026-Windows.zip
+  mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sh mac/compilar-mac.sh
+      - name: Empaquetar
+        run: |
+          mkdir paquete
+          ditto "mac/AutoPrision 2026.app" "paquete/AutoPrision 2026.app"
+          cp mac/LEEME-MAC.txt paquete/
+          ditto -c -k --keepParent paquete AutoPrision2026-Mac.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AutoPrision2026-Mac
+          path: AutoPrision2026-Mac.zip
+  publicar:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [windows, mac]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+      - name: Crear la versión con los dos ZIP
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" AutoPrision2026-Windows.zip AutoPrision2026-Mac.zip \
+            --repo "$GITHUB_REPOSITORY" --title "AutoPrisión 2026 $GITHUB_REF_NAME" \
+            --notes "Descarga el ZIP de tu sistema: Windows o Mac. Instrucciones dentro (LEEME)."

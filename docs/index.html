@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AutoPrisión 2026</title>
+<meta name="description" content="Bot de clics y teclas para Prison Legacy. Descarga gratis para Windows y Mac.">
+<style>
+  :root { --bg:#f6f4ef; --fg:#1d1c1a; --muted:#5f5b53; --card:#fff; --line:#ddd8cc; --accent:#b8461b; --accent-fg:#fff; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#161513; --fg:#ece8df; --muted:#a39e93; --card:#201f1c; --line:#35322d; --accent:#e0703f; --accent-fg:#161513; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  main { max-width:760px; margin:0 auto; padding:48px 16px 64px; }
+  h1 { font-size:2.4rem; line-height:1.1; margin:0 0 8px; letter-spacing:-.02em; }
+  .sub { color:var(--muted); font-size:1.1rem; margin:0 0 32px; }
+  .descargas { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; margin-bottom:12px; }
+  .boton { display:block; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; text-decoration:none; color:inherit; }
+  .boton:hover { border-color:var(--accent); }
+  .boton strong { display:block; font-size:1.25rem; }
+  .boton span { color:var(--muted); font-size:.92rem; }
+  .boton em { display:inline-block; margin-top:12px; background:var(--accent); color:var(--accent-fg); font-style:normal; font-weight:600; padding:8px 14px; border-radius:8px; }
+  .nota { color:var(--muted); font-size:.9rem; margin:0 0 40px; }
+  h2 { font-size:1.3rem; margin:36px 0 12px; }
+  table { width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  td { padding:9px 14px; border-top:1px solid var(--line); vertical-align:top; }
+  tr:first-child td { border-top:0; }
+  td:first-child { white-space:nowrap; font-weight:600; font-family:ui-monospace,Consolas,monospace; font-size:.92rem; }
+  ol { padding-left:20px; } li { margin-bottom:6px; }
+  .aviso { border-left:3px solid var(--accent); padding:4px 0 4px 14px; color:var(--muted); }
+  footer { margin-top:48px; color:var(--muted); font-size:.85rem; }
+  a { color:var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>AutoPrisión 2026</h1>
+  <p class="sub">Bot de clics y teclas para Prison Legacy. Graba lo que haces, repítelo en bucle y deja la autopelea encendida. Pulsa TAB y se para al momento.</p>
+
+  <div class="descargas">
+    <a class="boton" href="https://github.com/instcide-Es/autoprision-2026/releases/latest/download/AutoPrision2026-Windows.zip">
+      <strong>Windows</strong><span>Windows 10 y 11 · sin instalar nada</span><br><em>Descargar para Windows</em>
+    </a>
+    <a class="boton" href="https://github.com/instcide-Es/autoprision-2026/releases/latest/download/AutoPrision2026-Mac.zip">
+      <strong>Mac</strong><span>macOS 14 o posterior · Apple Silicon e Intel</span><br><em>Descargar para Mac</em>
+    </a>
+  </div>
+  <p class="nota">Gratis y de código abierto. <a href="https://github.com/instcide-Es/autoprision-2026">Ver el código en GitHub</a> · <a href="https://github.com/instcide-Es/autoprision-2026/releases">Todas las versiones</a></p>
+
+  <h2>Teclas</h2>
+  <table>
+    <tr><td>TAB+1</td><td>Autoclick</td></tr>
+    <tr><td>TAB+2+nº</td><td>Grabar la secuencia nº (TAB termina)</td></tr>
+    <tr><td>TAB+3+nº</td><td>Reproducir la secuencia nº en bucle hasta TAB</td></tr>
+    <tr><td>TAB+4</td><td>Cambiar la velocidad</td></tr>
+    <tr><td>TAB+5+nº</td><td>Reproducir la secuencia nº una vez</td></tr>
+    <tr><td>TAB+6</td><td>Autopelea (Control+R en cada turno)</td></tr>
+    <tr><td>TAB+7 / TAB+8</td><td>Guardar / borrar la señal de turno (el color que hay bajo el ratón, p. ej. el botón FIN TURNO)</td></tr>
+    <tr><td>0</td><td>Quitar el menú</td></tr>
+    <tr><td>TAB</td><td><strong>Parar todo.</strong> De reserva: F11 o Pausa (Windows), F11 o Cmd+punto (Mac)</td></tr>
+  </table>
+
+  <h2>Instalar en Windows</h2>
+  <ol>
+    <li>Descomprime el ZIP en una carpeta propia y abre <b>AutoPrision2026.exe</b>.</li>
+    <li>Si sale «Windows protegió su PC», pulsa <b>Más información</b> y luego <b>Ejecutar de todas formas</b> (el programa no está firmado).</li>
+  </ol>
+
+  <h2>Instalar en Mac</h2>
+  <ol>
+    <li>Descomprime el ZIP y arrastra <b>AutoPrision 2026.app</b> a Aplicaciones.</li>
+    <li>Si el Mac dice que no puede comprobar la app, ve a Ajustes del Sistema › Privacidad y seguridad y pulsa <b>Abrir igualmente</b>.</li>
+    <li>Activa AutoPrisión 2026 en <b>Accesibilidad</b> y en <b>Monitorización de entrada</b> (y en Grabación de pantalla si usas la señal de turno). Después ciérralo y vuelve a abrirlo.</li>
+  </ol>
+
+  <p class="aviso">Úsalo bajo tu responsabilidad: las normas del juego pueden no permitir automatizar acciones y se arriesga la cuenta. Este proyecto no tiene relación oficial con Prison Legacy.</p>
+
+  <footer>Basado en AutoPrisión DX Profesional de Jagoba Los Arcos González (MoleSoft, 2003-2007). Versión 2026: Carlos Sanz.</footer>
+</main>
+</body>
+</html>
