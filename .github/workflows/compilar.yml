@@ -57,7 +57,7 @@ jobs:
         if: always()
         with:
           name: captura-linux
-          path: linux/captura.png
+          path: linux/captura*.png
       - name: Empaquetar
         run: |
           mkdir AutoPrision2026-Linux
