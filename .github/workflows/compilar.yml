@@ -2,8 +2,8 @@ name: Compilar Windows y Mac
 on:
   push:
     branches: [main]
-  pull_request:
     tags: ['v*']
+  pull_request:
   workflow_dispatch:
 permissions:
   contents: write
@@ -16,7 +16,7 @@ jobs:
         shell: cmd
         run: |
           cd windows
-          "%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /codepage:65001 /optimize+ /target:winexe /platform:anycpu /out:AutoPrision2026.exe /r:System.Windows.Forms.dll /r:System.Drawing.dll AutoPrision.cs
+          "%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /codepage:65001 /optimize+ /target:winexe /platform:anycpu /out:AutoPrision2026.exe /r:System.Windows.Forms.dll /r:System.Drawing.dll /win32icon:autoprision.ico AutoPrision.cs
       - name: Empaquetar
         shell: pwsh
         run: |
@@ -61,7 +61,7 @@ jobs:
       - name: Empaquetar
         run: |
           mkdir AutoPrision2026-Linux
-          cp linux/autoprision2026 linux/LEEME-LINUX.txt linux/instalar.sh AutoPrision2026-Linux/
+          cp linux/autoprision2026 linux/LEEME-LINUX.txt linux/instalar.sh linux/icono.png AutoPrision2026-Linux/
           chmod +x AutoPrision2026-Linux/autoprision2026 AutoPrision2026-Linux/instalar.sh
           tar czf AutoPrision2026-Linux.tar.gz AutoPrision2026-Linux
       - uses: actions/upload-artifact@v4

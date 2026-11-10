@@ -744,7 +744,7 @@ namespace AutoPrision2026
             grabador = new Grabador(cfg);
 
             Text = "AutoPrisión 2026 por Carlos Sanz · basado en AutoPrisión DX de MoleSoft";
-            Icon = SystemIcons.Application;
+            try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); } catch { Icon = SystemIcons.Application; }
             ClientSize = new Size(780, 600);
             MinimumSize = new Size(700, 560);
             Font = new Font("Segoe UI", 9f);
