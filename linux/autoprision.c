@@ -28,6 +28,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
+#include "icono.h"
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -1491,7 +1492,13 @@ static void construir(void) {
     gtk_window_set_title(GTK_WINDOW(ventana), "AutoPrisión 2026 por Carlos Sanz · basado en AutoPrisión DX de MoleSoft");
     gtk_window_set_default_size(GTK_WINDOW(ventana), 840, 700);
     gtk_window_set_position(GTK_WINDOW(ventana), GTK_WIN_POS_CENTER);
-    gtk_window_set_icon_name(GTK_WINDOW(ventana), "input-mouse");
+    {   /* Icono de las espadas (el de AutoPrisión DX), metido dentro del programa */
+        GInputStream *flujo = g_memory_input_stream_new_from_data(icono_png, sizeof icono_png, NULL);
+        GdkPixbuf *pb = gdk_pixbuf_new_from_stream(flujo, NULL, NULL);
+        g_object_unref(flujo);
+        if (pb) { gtk_window_set_default_icon(pb); gtk_window_set_icon(GTK_WINDOW(ventana), pb); g_object_unref(pb); }
+        else gtk_window_set_icon_name(GTK_WINDOW(ventana), "input-mouse");
+    }
     g_signal_connect(ventana, "destroy", G_CALLBACK(en_cerrar), NULL);
 
     GtkWidget *v = gtk_box_new(GTK_ORIENTATION_VERTICAL, 8);

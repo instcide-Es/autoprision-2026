@@ -5,7 +5,14 @@ set -e
 cd "$(dirname "$0")"
 APP="AutoPrision 2026.app"
 rm -rf "$APP" build
-mkdir -p "$APP/Contents/MacOS" build
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" build
+# Icono de las espadas (el de AutoPrisión DX) a partir de icono.png (1024x1024)
+mkdir -p build/AppIcon.iconset
+for T in 16 32 128 256 512; do
+  sips -z $T $T icono.png --out "build/AppIcon.iconset/icon_${T}x${T}.png" >/dev/null
+  sips -z $((T*2)) $((T*2)) icono.png --out "build/AppIcon.iconset/icon_${T}x${T}@2x.png" >/dev/null
+done
+iconutil -c icns build/AppIcon.iconset -o "$APP/Contents/Resources/AppIcon.icns"
 for ARCH in arm64 x86_64; do
   swiftc -O -swift-version 5 -target "$ARCH-apple-macos14.0" -o "build/AutoPrision2026-$ARCH" main.swift \
     -framework AppKit -framework ScreenCaptureKit
